@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.investment.bitcoin.markettickpricenotifyservice.mapper.TargetTickPriceMapper">
+    <resultMap id="TargetTickPriceMap" type="TargetTickPrice">
+        <result property="token" column="FCM_DEVICE_TOKEN"/>
+        <result property="marketId" column="MARKET_ID"/>
+        <result property="tickPrice" column="TRADE_PRICE"/>
+    </resultMap>
+
+    <select id="selectTargetOverTickPrices" resultMap="TargetTickPriceMap">
+        SELECT
+        TARGET.FCM_DEVICE_TOKEN AS FCM_DEVICE_TOKEN,
+        TARGET.MARKET_ID AS MARKET_ID,
+        PRICE.TRADE_PRICE AS TRADE_PRICE
+        FROM TN_CM_TARGET_TICK_PRICE TARGET, TH_CM_TICK_PRICE PRICE
+        WHERE TARGET.MARKET_ID = PRICE.MARKET_ID
+        AND PRICE.TRADE_PRICE >= TARGET.TARGET_TICK_PRICE
+        AND PRICE.INSRT_DATE >= SYSDATE - 1 / 24 / 60 / 6
+        GROUP BY TARGET.FCM_DEVICE_TOKEN, TARGET.MARKET_ID, PRICE.TRADE_PRICE
+        HAVING COUNT(1) > 0
+    </select>
+
+</mapper>
